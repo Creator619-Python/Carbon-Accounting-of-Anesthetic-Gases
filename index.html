@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anesthetic Gas Carbon Emission Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --primary: #2c3e50;
+        --secondary: #3498db;
+        --success: #27ae60;
+        --danger: #e74c3c;
+        --warning: #f39c12;
+        --info: #17a2b8;
+        --light: #ecf0f1;
+        --dark: #34495e;
+        --background: #1a1a2e;
+        --card-bg: #16213e;
+        --text: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        padding: 30px 0;
+        color: white;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .welcome-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .usage-options {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin: 30px 0;
+        flex-wrap: wrap;
+      }
+
+      .usage-option {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 25px;
+        border-radius: 12px;
+        border: 2px solid;
+        min-width: 280px;
+        transition: all 0.3s ease;
+      }
+
+      .usage-option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+
+      .usage-option.quick {
+        border-color: #3498db;
+      }
+
+      .usage-option.personalized {
+        border-color: #27ae60;
+      }
+
+      .option-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .user-header {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--success);
+      }
+
+      .user-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .user-stats {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9em;
+        color: #ccc;
+      }
+
+      .user-stats span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+
+      .card-title {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+        color: var(--light);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+      }
+
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+
+      .tab.active {
+        background-color: var(--secondary);
+      }
+
+      .tab:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .input-group label {
+        width: 180px;
+        font-weight: 500;
+      }
+
+      .input-group input {
+        padding: 10px 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.2);
+        color: white;
+        width: 120px;
+        margin-right: 10px;
+      }
+
+      .input-group .unit {
+        width: 40px;
+      }
+
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        margin-left: 10px;
+        color: var(--info);
+        cursor: help;
+      }
+
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 10px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.9rem;
+      }
+
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .btn-primary {
+        background-color: var(--secondary);
+        color: white;
+      }
+
+      .btn-success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .btn-warning {
+        background-color: var(--warning);
+        color: white;
+      }
+
+      .btn-danger {
+        background-color: var(--danger);
+        color: white;
+      }
+
+      .btn-info {
+        background-color: var(--info);
+        color: white;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 2px solid var(--secondary);
+        color: var(--secondary);
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+
+      .btn-sm {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .result-total {
+        font-weight: bold;
+        font-size: 1.2rem;
+        padding-top: 15px;
+        border-top: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .impact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+      }
+
+      .impact-icon {
+        font-size: 1.8rem;
+        margin-right: 15px;
+      }
+
+      .impact-label {
+        flex: 1;
+      }
+
+      .impact-value {
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      .chart-container {
+        height: 300px;
+        margin-top: 20px;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px 0;
+        margin-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -15px;
+      }
+
+      .col {
+        flex: 1;
+        padding: 0 15px;
+        min-width: 300px;
+      }
+
+      .history-item {
+        border: 1px solid #444;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .history-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .personalize-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 15px;
+        border-left: 4px solid var(--success);
+      }
+
+      .settings-preview {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+      }
+
+      .setting-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9em;
+      }
+
+      .settings-quick-access {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 15px 0;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+      }
+
+      .methodology-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border-left: 4px solid var(--info);
+      }
+
+      .methodology-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .methodology-item {
+        margin-bottom: 15px;
+      }
+
+      .methodology-item h4 {
+        margin-bottom: 8px;
+        color: var(--light);
+      }
+
+      .methodology-item p {
+        font-size: 0.95em;
+        line-height: 1.5;
+        color: #ccc;
+      }
+
+      .methodology-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      .methodology-table th,
+      .methodology-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .methodology-table th {
+        background-color: rgba(0, 0, 0, 0.2);
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          flex-direction: column;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .history-actions {
+          flex-direction: column;
+        }
+
+        .usage-options {
+          flex-direction: column;
+        }
+
+        .user-info {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .user-stats {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .settings-quick-access {
+          flex-direction: column;
+        }
+
+        .methodology-content {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🌿 Anesthetic Gas Carbon Emission Calculator</h1>
+        <p class="subtitle">
+          Calculate CO₂ equivalent emissions and environmental impact of
+          anesthetic gases
+        </p>
+      </header>
+
+      <!-- Welcome Section - Shows initially -->
+      <div class="welcome-section" id="welcome-section">
+        <h2>👋 Welcome to the Emission Calculator!</h2>
+        <p style="margin: 15px 0; font-size: 1.1em">
+          Choose how you'd like to use the calculator:
+        </p>
+
+        <div class="usage-options">
+          <!-- Quick Start Option -->
+          <div class="usage-option quick">
+            <div class="option-icon">🚀</div>
+            <h3>Quick Calculator</h3>
+            <p style="margin: 15px 0; color: #ccc">
+              Use immediately with default settings
+            </p>
+            <ul
+              style="
+                text-align: left;
+                margin: 15px 0;
+                color: #aaa;
+                font-size: 0.9em;
+              "
+            >
+              <li>Start calculating right away</li>
+              <li>No data saving</li>
+              <li>Perfect for one-time use</li>
+            </ul>
+            <button class="btn btn-primary" id="quick-start-btn">
+              Start Calculating Now
+            </button>
+          </div>
+
+          <!-- Personalized Option -->
+          <div class="usage-option personalized">
+            <div class="option-icon">💾</div>
+            <h3>Save My Work</h3>
+            <p style="margin: 15px 0; color: #ccc">
+              Save calculations & custom settings
+            </p>
+            <ul
+              style="
+                text-align: left;
+                margin: 15px 0;
+                color: #aaa;
+                font-size: 0.9em;
+              "
+            >
+              <li>Save calculation history</li>
+              <li>Remember your custom settings</li>
+              <li>Export your data</li>
+            </ul>
+            <div style="margin: 20px 0">
+              <input
+                type="text"
+                id="user-name"
+                placeholder="Enter your name or nickname"
+                style="
+                  padding: 12px;
+                  width: 100%;
+                  border-radius: 8px;
+                  border: 1px solid rgba(255, 255, 255, 0.3);
+                  background: rgba(0, 0, 0, 0.2);
+                  color: white;
+                  font-size: 1em;
+                "
+              />
+            </div>
+            <button class="btn btn-success" id="personalized-start-btn">
+              Save & Start Calculating
+            </button>
+          </div>
+        </div>
+
+        <div style="font-size: 0.9em; color: #aaa; margin-top: 20px">
+          💡
+          <em
+            >All data stays in your browser - no account or password needed!</em
+          >
+        </div>
+      </div>
+
+      <!-- User Header - Shows after user chooses an option -->
+      <div class="user-header" id="user-header" style="display: none">
+        <div class="user-info">
+          <div>
+            <span style="font-size: 1.1em"
+              >👤 <strong id="current-user-display">Guest User</strong></span
+            >
+            <div class="user-stats" id="user-stats" style="display: none">
+              <span>📊 <span id="calculation-count">0</span> saved</span>
+              <span>⚙️ <span id="settings-status">Default settings</span></span>
+              <button class="btn btn-outline btn-sm" id="switch-user-btn">
+                Switch User
+              </button>
+            </div>
+          </div>
+          <div id="guest-notice" style="font-size: 0.9em; color: #ffa500">
+            🔸 Using as guest -
+            <a href="#" id="save-work-link" style="color: #4ade80"
+              >Save your work</a
+            >
+          </div>
+        </div>
+
+        <!-- Personalize Section - Shows when guest wants to save -->
+        <div
+          class="personalize-section"
+          id="personalize-section"
+          style="display: none"
+        >
+          <p style="margin-bottom: 15px">
+            💡 <strong>Save your calculations and settings:</strong>
+          </p>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <input
+              type="text"
+              id="switch-user-name"
+              placeholder="Your name or nickname"
+              style="
+                flex: 1;
+                min-width: 200px;
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                background: rgba(0, 0, 0, 0.2);
+                color: white;
+              "
+            />
+            <button class="btn btn-success" id="save-user-btn">
+              Save My Work
+            </button>
+            <button class="btn btn-outline" id="cancel-personalize-btn">
+              Cancel
+            </button>
+          </div>
+          <p style="font-size: 0.8em; color: #aaa; margin-top: 10px">
+            Your calculations and settings will be saved in this browser
+          </p>
+        </div>
+      </div>
+
+      <div class="tabs" id="main-tabs" style="display: none">
+        <div class="tab active" data-tab="calculator">Calculator</div>
+        <div class="tab" data-tab="history">My History</div>
+        <div class="tab" data-tab="settings">My Settings</div>
+        <div class="tab" data-tab="methodology">Methodology</div>
+      </div>
+
+      <!-- Calculator Tab -->
+      <div class="tab-content active" id="calculator-tab">
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <h2 class="card-title">Enter Gas Amounts (kg)</h2>
+
+              <div class="input-group">
+                <label for="co2">Carbon Dioxide:</label>
+                <input type="number" id="co2" value="1.0" step="0.1" min="0" />
+                <span class="unit">kg</span>
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 1 (Reference gas)</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="n2o">Nitrous Oxide:</label>
+                <input type="number" id="n2o" value="1.0" step="0.1" min="0" />
+                <span class="unit">kg</span>
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 273</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="desflurane">Desflurane:</label>
+                <input
+                  type="number"
+                  id="desflurane"
+                  value="1.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">kg</span>
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 2540</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="sevoflurane">Sevoflurane:</label>
+                <input
+                  type="number"
+                  id="sevoflurane"
+                  value="1.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">kg</span>
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 144</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="isoflurane">Isoflurane:</label>
+                <input
+                  type="number"
+                  id="isoflurane"
+                  value="1.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">kg</span>
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 539</span>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px">
+                <button class="btn btn-primary" id="calculate-btn">
+                  Calculate Emissions
+                </button>
+                <button class="btn btn-warning" id="reset-btn">Reset</button>
+                <button class="btn btn-success" id="save-btn">
+                  Save This Calculation
+                </button>
+              </div>
+
+              <!-- Quick Access to Settings -->
+              <div class="settings-quick-access">
+                <button
+                  class="btn btn-info btn-sm"
+                  id="customize-emissions-btn"
+                >
+                  ⚙️ Customize Emission Factors
+                </button>
+                <button class="btn btn-info btn-sm" id="customize-costs-btn">
+                  💰 Customize Gas Costs
+                </button>
+                <button class="btn btn-outline btn-sm" id="show-settings-btn">
+                  ℹ️ Show Current Settings
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">Calculation Results</h2>
+
+              <h3 style="margin-bottom: 15px">CO₂ Equivalent Emissions:</h3>
+              <div class="results-grid">
+                <div class="result-item">
+                  <span>Carbon Dioxide:</span>
+                  <span id="result-co2">0 kg</span>
+                </div>
+                <div class="result-item">
+                  <span>Nitrous Oxide:</span>
+                  <span id="result-n2o">0 kg</span>
+                </div>
+                <div class="result-item">
+                  <span>Desflurane:</span>
+                  <span id="result-desflurane">0 kg</span>
+                </div>
+                <div class="result-item">
+                  <span>Sevoflurane:</span>
+                  <span id="result-sevoflurane">0 kg</span>
+                </div>
+                <div class="result-item">
+                  <span>Isoflurane:</span>
+                  <span id="result-isoflurane">0 kg</span>
+                </div>
+                <div class="result-item result-total">
+                  <span>Total CO₂ Equivalent:</span>
+                  <span id="result-total">0 kg</span>
+                </div>
+              </div>
+
+              <h3 style="margin: 25px 0 15px">Cost Analysis:</h3>
+              <div class="results-grid">
+                <div class="result-item">
+                  <span>Carbon Dioxide Cost:</span>
+                  <span id="cost-co2">$0</span>
+                </div>
+                <div class="result-item">
+                  <span>Nitrous Oxide Cost:</span>
+                  <span id="cost-n2o">$0</span>
+                </div>
+                <div class="result-item">
+                  <span>Desflurane Cost:</span>
+                  <span id="cost-desflurane">$0</span>
+                </div>
+                <div class="result-item">
+                  <span>Sevoflurane Cost:</span>
+                  <span id="cost-sevoflurane">$0</span>
+                </div>
+                <div class="result-item">
+                  <span>Isoflurane Cost:</span>
+                  <span id="cost-isoflurane">$0</span>
+                </div>
+                <div class="result-item result-total">
+                  <span>Total Gas Cost:</span>
+                  <span id="cost-total">$0</span>
+                </div>
+                <div class="result-item">
+                  <span>Carbon Cost (@$50/ton):</span>
+                  <span id="carbon-cost">$0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card">
+              <h2 class="card-title">Emissions Breakdown</h2>
+              <div class="chart-container">
+                <canvas id="emissions-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">Environmental Impact</h2>
+
+              <div class="impact-item">
+                <div class="impact-icon">🚗</div>
+                <div class="impact-label">Equivalent Car Miles:</div>
+                <div class="impact-value" id="impact-cars">0 miles</div>
+              </div>
+
+              <div class="impact-item">
+                <div class="impact-icon">🏠</div>
+                <div class="impact-label">Home Energy (1 day):</div>
+                <div class="impact-value" id="impact-homes">0 homes</div>
+              </div>
+
+              <div class="impact-item">
+                <div class="impact-icon">🌳</div>
+                <div class="impact-label">Tree Sequestration (10 yrs):</div>
+                <div class="impact-value" id="impact-trees">0 trees</div>
+              </div>
+            </div>
+
+            <!-- Settings Preview -->
+            <div class="card">
+              <h2 class="card-title">Current Settings</h2>
+              <div class="settings-preview">
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                  "
+                >
+                  <div>
+                    <h4 style="margin-bottom: 10px; font-size: 1em">
+                      Emission Factors
+                    </h4>
+                    <div class="setting-item">
+                      <span>CO₂:</span> <span id="preview-co2">1</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>N₂O:</span> <span id="preview-n2o">273</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Desflurane:</span>
+                      <span id="preview-desflurane">2540</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Sevoflurane:</span>
+                      <span id="preview-sevoflurane">144</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Isoflurane:</span>
+                      <span id="preview-isoflurane">539</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 style="margin-bottom: 10px; font-size: 1em">
+                      Gas Costs ($/kg)
+                    </h4>
+                    <div class="setting-item">
+                      <span>CO₂:</span> <span id="preview-cost-co2">$0.50</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>N₂O:</span> <span id="preview-cost-n2o">$2.00</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Desflurane:</span>
+                      <span id="preview-cost-desflurane">$350.00</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Sevoflurane:</span>
+                      <span id="preview-cost-sevoflurane">$280.00</span>
+                    </div>
+                    <div class="setting-item">
+                      <span>Isoflurane:</span>
+                      <span id="preview-cost-isoflurane">$120.00</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 15px; text-align: center">
+                  <button class="btn btn-primary" id="go-to-settings-btn">
+                    ⚙️ Customize These Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div class="tab-content" id="history-tab">
+        <div class="card">
+          <h2 class="card-title">My Calculation History</h2>
+          <div id="history-list">
+            <div style="text-align: center; padding: 40px 20px; color: #aaa">
+              <div style="font-size: 3rem; margin-bottom: 20px">📊</div>
+              <h3>No calculations saved yet</h3>
+              <p>Your calculations will appear here when you save them</p>
+              <p style="font-size: 0.9em; margin-top: 10px">
+                Go to the Calculator tab to get started
+              </p>
+            </div>
+          </div>
+          <div style="margin-top: 20px">
+            <button class="btn btn-danger" id="clear-history-btn">
+              Clear All History
+            </button>
+            <button class="btn btn-info" id="export-history-btn">
+              Export My Data
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="tab-content" id="settings-tab">
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <h2 class="card-title">Emission Factors (GWP Values)</h2>
+              <p style="margin-bottom: 20px">
+                Global Warming Potential (GWP) values relative to CO₂
+              </p>
+
+              <div class="input-group">
+                <label for="factor-co2">Carbon Dioxide (CO₂):</label>
+                <input
+                  type="number"
+                  id="factor-co2"
+                  value="1"
+                  step="0.1"
+                  min="0"
+                />
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">Reference gas (GWP = 1)</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="factor-n2o">Nitrous Oxide (N₂O):</label>
+                <input
+                  type="number"
+                  id="factor-n2o"
+                  value="273"
+                  step="0.1"
+                  min="0"
+                />
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 273</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="factor-desflurane">Desflurane:</label>
+                <input
+                  type="number"
+                  id="factor-desflurane"
+                  value="2540"
+                  step="1"
+                  min="0"
+                />
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 2540</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="factor-sevoflurane">Sevoflurane:</label>
+                <input
+                  type="number"
+                  id="factor-sevoflurane"
+                  value="144"
+                  step="1"
+                  min="0"
+                />
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 144</span>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="factor-isoflurane">Isoflurane:</label>
+                <input
+                  type="number"
+                  id="factor-isoflurane"
+                  value="539"
+                  step="1"
+                  min="0"
+                />
+                <div class="tooltip">
+                  ℹ️
+                  <span class="tooltiptext">GWP: 539</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card">
+              <h2 class="card-title">Gas Costs ($ per kg)</h2>
+
+              <div class="input-group">
+                <label for="cost-setting-co2">Carbon Dioxide Cost:</label>
+                <input
+                  type="number"
+                  id="cost-setting-co2"
+                  value="0.5"
+                  step="0.01"
+                  min="0"
+                />
+                <span class="unit">$/kg</span>
+              </div>
+
+              <div class="input-group">
+                <label for="cost-setting-n2o">Nitrous Oxide Cost:</label>
+                <input
+                  type="number"
+                  id="cost-setting-n2o"
+                  value="2.0"
+                  step="0.01"
+                  min="0"
+                />
+                <span class="unit">$/kg</span>
+              </div>
+
+              <div class="input-group">
+                <label for="cost-setting-desflurane">Desflurane Cost:</label>
+                <input
+                  type="number"
+                  id="cost-setting-desflurane"
+                  value="350.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">$/kg</span>
+              </div>
+
+              <div class="input-group">
+                <label for="cost-setting-sevoflurane">Sevoflurane Cost:</label>
+                <input
+                  type="number"
+                  id="cost-setting-sevoflurane"
+                  value="280.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">$/kg</span>
+              </div>
+
+              <div class="input-group">
+                <label for="cost-setting-isoflurane">Isoflurane Cost:</label>
+                <input
+                  type="number"
+                  id="cost-setting-isoflurane"
+                  value="120.0"
+                  step="0.1"
+                  min="0"
+                />
+                <span class="unit">$/kg</span>
+              </div>
+
+              <div style="margin-top: 25px">
+                <button class="btn btn-primary" id="save-settings-btn">
+                  Save My Settings
+                </button>
+                <button class="btn btn-warning" id="reset-settings-btn">
+                  Reset to Defaults
+                </button>
+                <button class="btn btn-success" id="apply-settings-btn">
+                  Apply Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Methodology Tab - UPDATED WITH DETAILED CONTENT -->
+      <div class="tab-content" id="methodology-tab">
+        <div class="card">
+          <h2 class="card-title">Calculation Methodology & Emission Factors</h2>
+
+          <div class="methodology-section">
+            <h3>🌍 Calculation Methodology</h3>
+            <div class="methodology-content">
+              <div class="methodology-item">
+                <h4>CO₂ Equivalent Emissions Calculation</h4>
+                <p>
+                  The calculator converts anesthetic gas amounts to CO₂
+                  equivalent emissions using Global Warming Potential (GWP)
+                  values over a 100-year timeframe:
+                </p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> CO₂e = Gas Amount (kg) × GWP<sub
+                    >100</sub
+                  >
+                </div>
+                <p>Where:</p>
+                <ul>
+                  <li>
+                    <strong>CO₂e</strong> = Carbon Dioxide Equivalent emissions
+                    in kilograms
+                  </li>
+                  <li>
+                    <strong>Gas Amount</strong> = Mass of anesthetic gas used in
+                    kilograms
+                  </li>
+                  <li>
+                    <strong>GWP<sub>100</sub></strong> = Global Warming
+                    Potential over 100 years relative to CO₂
+                  </li>
+                </ul>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Example Calculation</h4>
+                <p>For 1 kg of Desflurane with GWP = 2540:</p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  CO₂e = 1 kg × 2540 = 2,540 kg CO₂ equivalent
+                </div>
+                <p>
+                  This means 1 kg of Desflurane has the same warming impact as
+                  2,540 kg of CO₂ over 100 years.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="methodology-section">
+            <h3>📊 Emission Factors (GWP Values)</h3>
+            <p>
+              The following Global Warming Potential (GWP) values are used based
+              on the latest scientific literature:
+            </p>
+
+            <table class="methodology-table">
+              <thead>
+                <tr>
+                  <th>Anesthetic Gas</th>
+                  <th>Chemical Formula</th>
+                  <th>GWP<sub>100</sub></th>
+                  <th>Atmospheric Lifetime</th>
+                  <th>Primary Reference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Carbon Dioxide</strong></td>
+                  <td>CO₂</td>
+                  <td>1</td>
+                  <td>Variable (50-200 years)</td>
+                  <td>IPCC AR6 (Reference gas)</td>
+                </tr>
+                <tr>
+                  <td><strong>Nitrous Oxide</strong></td>
+                  <td>N₂O</td>
+                  <td>273</td>
+                  <td>114 years</td>
+                  <td>IPCC AR6 (2021)</td>
+                </tr>
+                <tr>
+                  <td><strong>Desflurane</strong></td>
+                  <td>C₃H₂F₆O</td>
+                  <td>2540</td>
+                  <td>14 years</td>
+                  <td>Sherman et al. (2012)<br />Ryan & Nielsen (2010)</td>
+                </tr>
+                <tr>
+                  <td><strong>Sevoflurane</strong></td>
+                  <td>C₄H₃F₇O</td>
+                  <td>144</td>
+                  <td>1.2 years</td>
+                  <td>Sherman et al. (2012)<br />Andersen et al. (2012)</td>
+                </tr>
+                <tr>
+                  <td><strong>Isoflurane</strong></td>
+                  <td>C₃H₂ClF₅O</td>
+                  <td>539</td>
+                  <td>3.2 years</td>
+                  <td>
+                    Sherman et al. (2012)<br />Sulbaek Andersen et al. (2011)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div
+              style="
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+              "
+            >
+              <h4>🔄 GWP Calculation Methodology</h4>
+              <p>
+                GWP values represent the cumulative radiative forcing over a
+                100-year time horizon, integrated and compared to CO₂:
+              </p>
+              <div
+                style="
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 15px;
+                  border-radius: 8px;
+                  margin: 10px 0;
+                "
+              >
+                <strong>GWP</strong> = ∫[RF<sub>gas</sub>(t) dt] /
+                ∫[RF<sub>CO₂</sub>(t) dt]
+              </div>
+              <p>Where:</p>
+              <ul>
+                <li>
+                  <strong>RF<sub>gas</sub>(t)</strong> = Radiative forcing of
+                  the gas at time t
+                </li>
+                <li>
+                  <strong>RF<sub>CO₂</sub>(t)</strong> = Radiative forcing of
+                  CO₂ at time t
+                </li>
+                <li>Integration is over 100 years (t=0 to t=100)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="methodology-section">
+            <h3>💡 Environmental Impact Equivalents</h3>
+            <div class="methodology-content">
+              <div class="methodology-item">
+                <h4>Vehicle Miles Equivalent</h4>
+                <p>Based on average passenger vehicle emissions:</p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> Equivalent Miles = Total CO₂e (kg) ÷
+                  0.404 kg/mile
+                </div>
+                <p>
+                  <strong>Source:</strong> EPA (2023) - Average passenger
+                  vehicle emits 404 g CO₂ per mile
+                </p>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Home Energy Consumption</h4>
+                <p>
+                  Based on average US household electricity emissions for one
+                  day:
+                </p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> Equivalent Homes = Total CO₂e (kg) ÷
+                  28.5 kg/home/day
+                </div>
+                <p>
+                  <strong>Source:</strong> EIA (2023) - Average US household: 29
+                  kWh/day × 0.98 kg CO₂/kWh
+                </p>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Tree Sequestration</h4>
+                <p>
+                  Based on carbon sequestration by mature trees over 10 years:
+                </p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> Equivalent Trees = Total CO₂e (kg) ÷
+                  21.77 kg/tree/year ÷ 10 years
+                </div>
+                <p>
+                  <strong>Source:</strong> USDA Forest Service - Mature tree
+                  absorbs ~48 lbs (21.77 kg) CO₂ annually
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="methodology-section">
+            <h3>💰 Cost Analysis Methodology</h3>
+            <div class="methodology-content">
+              <div class="methodology-item">
+                <h4>Gas Cost Calculation</h4>
+                <p>Direct costs based on market prices per kilogram:</p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> Gas Cost = Gas Amount (kg) × Cost
+                  per kg ($)
+                </div>
+                <p>
+                  Default prices based on 2023 market averages from hospital
+                  procurement data.
+                </p>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Carbon Cost Calculation</h4>
+                <p>Social cost of carbon based on economic impact models:</p>
+                <div
+                  style="
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                  "
+                >
+                  <strong>Formula:</strong> Carbon Cost = Total CO₂e (tons) ×
+                  $50/ton
+                </div>
+                <p>
+                  <strong>Source:</strong> US EPA Social Cost of Carbon (2022
+                  estimate: $51/ton)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="methodology-section">
+            <h3>📚 Scientific References & Data Sources</h3>
+            <div class="methodology-content">
+              <div class="methodology-item">
+                <h4>Primary References</h4>
+                <ol>
+                  <li>
+                    <strong>IPCC AR6 (2021)</strong> - Climate Change 2021: The
+                    Physical Science Basis
+                  </li>
+                  <li>
+                    <strong>Sherman, J., et al. (2012)</strong> - Life Cycle
+                    Greenhouse Gas Emissions of Anesthetic Drugs. Anesthesia &
+                    Analgesia
+                  </li>
+                  <li>
+                    <strong>Ryan, S. M., & Nielsen, C. J. (2010)</strong> -
+                    Global warming potential of inhaled anesthetics. Anesthesia
+                    & Analgesia
+                  </li>
+                  <li>
+                    <strong>Sulbaek Andersen, M. P., et al. (2011)</strong> -
+                    Inhalation anaesthetics and climate change. British Journal
+                    of Anaesthesia
+                  </li>
+                </ol>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Environmental Impact Data Sources</h4>
+                <ul>
+                  <li>
+                    <strong>EPA (2023)</strong> - Greenhouse Gas Emissions from
+                    a Typical Passenger Vehicle
+                  </li>
+                  <li>
+                    <strong>EIA (2023)</strong> - U.S. Energy Information
+                    Administration, Electricity Data
+                  </li>
+                  <li>
+                    <strong>USDA Forest Service</strong> - Urban Forest
+                    Ecosystems Institute
+                  </li>
+                  <li>
+                    <strong>US EPA (2022)</strong> - Social Cost of Carbon
+                    Estimates
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="methodology-section">
+            <h3>⚖️ Limitations & Considerations</h3>
+            <div class="methodology-content">
+              <div class="methodology-item">
+                <h4>Calculation Scope</h4>
+                <p>
+                  This calculator focuses on
+                  <strong>direct emissions</strong> from anesthetic gases and
+                  does not include:
+                </p>
+                <ul>
+                  <li>Indirect emissions from production and transportation</li>
+                  <li>
+                    Energy consumption of anesthesia machines and medical
+                    equipment
+                  </li>
+                  <li>Hospital infrastructure emissions</li>
+                  <li>Waste management and disposal impacts</li>
+                </ul>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Clinical Considerations</h4>
+                <ul>
+                  <li>
+                    GWP values represent environmental impact, not clinical
+                    efficacy
+                  </li>
+                  <li>
+                    Clinical decisions should prioritize patient safety and
+                    outcomes
+                  </li>
+                  <li>
+                    Low-flow anesthesia techniques can significantly reduce
+                    emissions
+                  </li>
+                  <li>
+                    Consider total carbon footprint of entire surgical procedure
+                  </li>
+                </ul>
+              </div>
+
+              <div class="methodology-item">
+                <h4>Regional Variations</h4>
+                <ul>
+                  <li>
+                    GWP values may vary based on regional atmospheric conditions
+                  </li>
+                  <li>Electricity grid carbon intensity varies by location</li>
+                  <li>Gas costs vary by region and purchasing agreements</li>
+                  <li>Carbon pricing policies differ by country and region</li>
+                </ul>
+              </div>
+            </div>
+
+            <div
+              style="
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(255, 165, 0, 0.1);
+                border-radius: 8px;
+                border-left: 4px solid orange;
+              "
+            >
+              <h4>⚠️ Important Note</h4>
+              <p>
+                This calculator is designed for
+                <strong>educational and environmental awareness purposes</strong
+                >. Clinical decisions should always prioritize patient safety
+                and follow established medical guidelines. Environmental
+                considerations should complement, not replace, sound clinical
+                judgment.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          Anesthetic Gas Carbon Emission Calculator | For educational and
+          informational purposes
+        </p>
+        <p>Data sources: IPCC AR5, Sherman et al. (2012)</p>
+      </footer>
+    </div>
+
+    <script>
+      // Application State
+      const state = {
+        currentUser: null,
+        isGuest: true,
+        calculationHistory: [],
+        settings: {
+          emissionFactors: {
+            co2: 1,
+            n2o: 273,
+            desflurane: 2540,
+            sevoflurane: 144,
+            isoflurane: 539,
+          },
+          gasCosts: {
+            co2: 0.5,
+            n2o: 2.0,
+            desflurane: 350.0,
+            sevoflurane: 280.0,
+            isoflurane: 120.0,
+          },
+        },
+      };
+
+      // DOM Elements
+      const elements = {
+        // Welcome section
+        welcomeSection: document.getElementById("welcome-section"),
+        quickStartBtn: document.getElementById("quick-start-btn"),
+        personalizedStartBtn: document.getElementById("personalized-start-btn"),
+        userNameInput: document.getElementById("user-name"),
+
+        // User header
+        userHeader: document.getElementById("user-header"),
+        currentUserDisplay: document.getElementById("current-user-display"),
+        userStats: document.getElementById("user-stats"),
+        calculationCount: document.getElementById("calculation-count"),
+        settingsStatus: document.getElementById("settings-status"),
+        guestNotice: document.getElementById("guest-notice"),
+        saveWorkLink: document.getElementById("save-work-link"),
+        switchUserBtn: document.getElementById("switch-user-btn"),
+
+        // Personalize section
+        personalizeSection: document.getElementById("personalize-section"),
+        switchUserName: document.getElementById("switch-user-name"),
+        saveUserBtn: document.getElementById("save-user-btn"),
+        cancelPersonalizeBtn: document.getElementById("cancel-personalize-btn"),
+
+        // Main tabs
+        mainTabs: document.getElementById("main-tabs"),
+        tabs: document.querySelectorAll(".tab"),
+        tabContents: document.querySelectorAll(".tab-content"),
+
+        // Calculator inputs
+        co2Input: document.getElementById("co2"),
+        n2oInput: document.getElementById("n2o"),
+        desfluraneInput: document.getElementById("desflurane"),
+        sevofluraneInput: document.getElementById("sevoflurane"),
+        isofluraneInput: document.getElementById("isoflurane"),
+        calculateBtn: document.getElementById("calculate-btn"),
+        resetBtn: document.getElementById("reset-btn"),
+        saveBtn: document.getElementById("save-btn"),
+
+        // Results
+        resultCo2: document.getElementById("result-co2"),
+        resultN2o: document.getElementById("result-n2o"),
+        resultDesflurane: document.getElementById("result-desflurane"),
+        resultSevoflurane: document.getElementById("result-sevoflurane"),
+        resultIsoflurane: document.getElementById("result-isoflurane"),
+        resultTotal: document.getElementById("result-total"),
+
+        // Costs
+        costCo2: document.getElementById("cost-co2"),
+        costN2o: document.getElementById("cost-n2o"),
+        costDesflurane: document.getElementById("cost-desflurane"),
+        costSevoflurane: document.getElementById("cost-sevoflurane"),
+        costIsoflurane: document.getElementById("cost-isoflurane"),
+        costTotal: document.getElementById("cost-total"),
+        carbonCost: document.getElementById("carbon-cost"),
+
+        // Environmental impact
+        impactCars: document.getElementById("impact-cars"),
+        impactHomes: document.getElementById("impact-homes"),
+        impactTrees: document.getElementById("impact-trees"),
+
+        // Settings
+        factorCo2: document.getElementById("factor-co2"),
+        factorN2o: document.getElementById("factor-n2o"),
+        factorDesflurane: document.getElementById("factor-desflurane"),
+        factorSevoflurane: document.getElementById("factor-sevoflurane"),
+        factorIsoflurane: document.getElementById("factor-isoflurane"),
+
+        costSettingCo2: document.getElementById("cost-setting-co2"),
+        costSettingN2o: document.getElementById("cost-setting-n2o"),
+        costSettingDesflurane: document.getElementById(
+          "cost-setting-desflurane"
+        ),
+        costSettingSevoflurane: document.getElementById(
+          "cost-setting-sevoflurane"
+        ),
+        costSettingIsoflurane: document.getElementById(
+          "cost-setting-isoflurane"
+        ),
+
+        saveSettingsBtn: document.getElementById("save-settings-btn"),
+        resetSettingsBtn: document.getElementById("reset-settings-btn"),
+        applySettingsBtn: document.getElementById("apply-settings-btn"),
+
+        // Settings preview
+        previewCo2: document.getElementById("preview-co2"),
+        previewN2o: document.getElementById("preview-n2o"),
+        previewDesflurane: document.getElementById("preview-desflurane"),
+        previewSevoflurane: document.getElementById("preview-sevoflurane"),
+        previewIsoflurane: document.getElementById("preview-isoflurane"),
+
+        previewCostCo2: document.getElementById("preview-cost-co2"),
+        previewCostN2o: document.getElementById("preview-cost-n2o"),
+        previewCostDesflurane: document.getElementById(
+          "preview-cost-desflurane"
+        ),
+        previewCostSevoflurane: document.getElementById(
+          "preview-cost-sevoflurane"
+        ),
+        previewCostIsoflurane: document.getElementById(
+          "preview-cost-isoflurane"
+        ),
+
+        // Quick access buttons
+        customizeEmissionsBtn: document.getElementById(
+          "customize-emissions-btn"
+        ),
+        customizeCostsBtn: document.getElementById("customize-costs-btn"),
+        showSettingsBtn: document.getElementById("show-settings-btn"),
+        goToSettingsBtn: document.getElementById("go-to-settings-btn"),
+
+        // History
+        historyList: document.getElementById("history-list"),
+        clearHistoryBtn: document.getElementById("clear-history-btn"),
+        exportHistoryBtn: document.getElementById("export-history-btn"),
+
+        // Chart
+        emissionsChart: null,
+      };
+
+      // Initialize the application
+      function init() {
+        // Load saved data from localStorage
+        loadSavedData();
+
+        // Set up event listeners
+        setupEventListeners();
+
+        // Update settings preview
+        updateSettingsPreview();
+
+        // Initialize chart
+        initChart();
+      }
+
+      // Load saved data from localStorage
+      function loadSavedData() {
+        // Try to load user data
+        const savedUser = localStorage.getItem("anestheticUser");
+        if (savedUser) {
+          state.currentUser = savedUser;
+          state.isGuest = false;
+
+          // Load user-specific data
+          const userData = localStorage.getItem(`anestheticData_${savedUser}`);
+          if (userData) {
+            const parsedData = JSON.parse(userData);
+            state.calculationHistory = parsedData.history || [];
+            state.settings = parsedData.settings || state.settings;
+          }
+
+          // Show user interface
+          showUserInterface();
+        }
+      }
+
+      // Set up all event listeners
+      function setupEventListeners() {
+        // Welcome section
+        elements.quickStartBtn.addEventListener("click", handleQuickStart);
+        elements.personalizedStartBtn.addEventListener(
+          "click",
+          handlePersonalizedStart
+        );
+
+        // User management
+        elements.saveWorkLink.addEventListener("click", showPersonalizeSection);
+        elements.switchUserBtn.addEventListener(
+          "click",
+          showPersonalizeSection
+        );
+        elements.saveUserBtn.addEventListener("click", saveUser);
+        elements.cancelPersonalizeBtn.addEventListener(
+          "click",
+          hidePersonalizeSection
+        );
+
+        // Tab navigation
+        elements.tabs.forEach((tab) => {
+          tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+        });
+
+        // Calculator
+        elements.calculateBtn.addEventListener("click", calculateEmissions);
+        elements.resetBtn.addEventListener("click", resetCalculator);
+        elements.saveBtn.addEventListener("click", saveCalculation);
+
+        // Settings
+        elements.saveSettingsBtn.addEventListener("click", saveSettings);
+        elements.resetSettingsBtn.addEventListener("click", resetSettings);
+        elements.applySettingsBtn.addEventListener("click", applySettings);
+
+        // Quick access buttons
+        elements.customizeEmissionsBtn.addEventListener("click", () =>
+          switchTab("settings")
+        );
+        elements.customizeCostsBtn.addEventListener("click", () =>
+          switchTab("settings")
+        );
+        elements.showSettingsBtn.addEventListener("click", showCurrentSettings);
+        elements.goToSettingsBtn.addEventListener("click", () =>
+          switchTab("settings")
+        );
+
+        // History
+        elements.clearHistoryBtn.addEventListener("click", clearHistory);
+        elements.exportHistoryBtn.addEventListener("click", exportHistory);
+      }
+
+      // Handle quick start (guest mode)
+      function handleQuickStart() {
+        state.currentUser = "Guest";
+        state.isGuest = true;
+        showUserInterface();
+      }
+
+      // Handle personalized start
+      function handlePersonalizedStart() {
+        const userName = elements.userNameInput.value.trim();
+        if (userName) {
+          state.currentUser = userName;
+          state.isGuest = false;
+          saveUserData();
+          showUserInterface();
+        } else {
+          alert("Please enter your name or nickname to save your work.");
+        }
+      }
+
+      // Show user interface after welcome
+      function showUserInterface() {
+        elements.welcomeSection.style.display = "none";
+        elements.userHeader.style.display = "block";
+        elements.mainTabs.style.display = "flex";
+
+        // Update user display
+        elements.currentUserDisplay.textContent = state.currentUser;
+
+        if (state.isGuest) {
+          elements.userStats.style.display = "none";
+          elements.guestNotice.style.display = "block";
+        } else {
+          elements.userStats.style.display = "flex";
+          elements.guestNotice.style.display = "none";
+          elements.calculationCount.textContent =
+            state.calculationHistory.length;
+          elements.settingsStatus.textContent = "Custom settings";
+        }
+
+        // Load settings into form
+        loadSettingsToForm();
+
+        // Update history display
+        updateHistoryDisplay();
+      }
+
+      // Show personalize section
+      function showPersonalizeSection() {
+        elements.personalizeSection.style.display = "block";
+        elements.switchUserName.value =
+          state.currentUser === "Guest" ? "" : state.currentUser;
+      }
+
+      // Hide personalize section
+      function hidePersonalizeSection() {
+        elements.personalizeSection.style.display = "none";
+      }
+
+      // Save user data
+      function saveUser() {
+        const userName = elements.switchUserName.value.trim();
+        if (userName) {
+          state.currentUser = userName;
+          state.isGuest = false;
+          saveUserData();
+          hidePersonalizeSection();
+          showUserInterface();
+        } else {
+          alert("Please enter your name or nickname.");
+        }
+      }
+
+      // Save user data to localStorage
+      function saveUserData() {
+        localStorage.setItem("anestheticUser", state.currentUser);
+
+        const userData = {
+          history: state.calculationHistory,
+          settings: state.settings,
+        };
+
+        localStorage.setItem(
+          `anestheticData_${state.currentUser}`,
+          JSON.stringify(userData)
+        );
+      }
+
+      // Switch between tabs
+      function switchTab(tabName) {
+        // Update active tab
+        elements.tabs.forEach((tab) => {
+          if (tab.dataset.tab === tabName) {
+            tab.classList.add("active");
+          } else {
+            tab.classList.remove("active");
+          }
+        });
+
+        // Show active tab content
+        elements.tabContents.forEach((content) => {
+          if (content.id === `${tabName}-tab`) {
+            content.classList.add("active");
+          } else {
+            content.classList.remove("active");
+          }
+        });
+
+        // Special handling for settings tab
+        if (tabName === "settings") {
+          loadSettingsToForm();
+        }
+      }
+
+      // Load settings into the form
+      function loadSettingsToForm() {
+        // Emission factors
+        elements.factorCo2.value = state.settings.emissionFactors.co2;
+        elements.factorN2o.value = state.settings.emissionFactors.n2o;
+        elements.factorDesflurane.value =
+          state.settings.emissionFactors.desflurane;
+        elements.factorSevoflurane.value =
+          state.settings.emissionFactors.sevoflurane;
+        elements.factorIsoflurane.value =
+          state.settings.emissionFactors.isoflurane;
+
+        // Gas costs
+        elements.costSettingCo2.value = state.settings.gasCosts.co2;
+        elements.costSettingN2o.value = state.settings.gasCosts.n2o;
+        elements.costSettingDesflurane.value =
+          state.settings.gasCosts.desflurane;
+        elements.costSettingSevoflurane.value =
+          state.settings.gasCosts.sevoflurane;
+        elements.costSettingIsoflurane.value =
+          state.settings.gasCosts.isoflurane;
+
+        // Update preview
+        updateSettingsPreview();
+      }
+
+      // Update settings preview
+      function updateSettingsPreview() {
+        // Emission factors
+        elements.previewCo2.textContent = state.settings.emissionFactors.co2;
+        elements.previewN2o.textContent = state.settings.emissionFactors.n2o;
+        elements.previewDesflurane.textContent =
+          state.settings.emissionFactors.desflurane;
+        elements.previewSevoflurane.textContent =
+          state.settings.emissionFactors.sevoflurane;
+        elements.previewIsoflurane.textContent =
+          state.settings.emissionFactors.isoflurane;
+
+        // Gas costs
+        elements.previewCostCo2.textContent = `$${state.settings.gasCosts.co2.toFixed(
+          2
+        )}`;
+        elements.previewCostN2o.textContent = `$${state.settings.gasCosts.n2o.toFixed(
+          2
+        )}`;
+        elements.previewCostDesflurane.textContent = `$${state.settings.gasCosts.desflurane.toFixed(
+          2
+        )}`;
+        elements.previewCostSevoflurane.textContent = `$${state.settings.gasCosts.sevoflurane.toFixed(
+          2
+        )}`;
+        elements.previewCostIsoflurane.textContent = `$${state.settings.gasCosts.isoflurane.toFixed(
+          2
+        )}`;
+      }
+
+      // Save settings
+      function saveSettings() {
+        // Get values from form
+        state.settings.emissionFactors.co2 =
+          parseFloat(elements.factorCo2.value) || 1;
+        state.settings.emissionFactors.n2o =
+          parseFloat(elements.factorN2o.value) || 273;
+        state.settings.emissionFactors.desflurane =
+          parseFloat(elements.factorDesflurane.value) || 2540;
+        state.settings.emissionFactors.sevoflurane =
+          parseFloat(elements.factorSevoflurane.value) || 144;
+        state.settings.emissionFactors.isoflurane =
+          parseFloat(elements.factorIsoflurane.value) || 539;
+
+        state.settings.gasCosts.co2 =
+          parseFloat(elements.costSettingCo2.value) || 0.5;
+        state.settings.gasCosts.n2o =
+          parseFloat(elements.costSettingN2o.value) || 2.0;
+        state.settings.gasCosts.desflurane =
+          parseFloat(elements.costSettingDesflurane.value) || 350.0;
+        state.settings.gasCosts.sevoflurane =
+          parseFloat(elements.costSettingSevoflurane.value) || 280.0;
+        state.settings.gasCosts.isoflurane =
+          parseFloat(elements.costSettingIsoflurane.value) || 120.0;
+
+        // Update preview
+        updateSettingsPreview();
+
+        // Save to localStorage if not guest
+        if (!state.isGuest) {
+          saveUserData();
+        }
+
+        alert("Settings saved successfully!");
+      }
+
+      // Reset settings to defaults
+      function resetSettings() {
+        if (
+          confirm(
+            "Are you sure you want to reset all settings to default values?"
+          )
+        ) {
+          state.settings = {
+            emissionFactors: {
+              co2: 1,
+              n2o: 273,
+              desflurane: 2540,
+              sevoflurane: 144,
+              isoflurane: 539,
+            },
+            gasCosts: {
+              co2: 0.5,
+              n2o: 2.0,
+              desflurane: 350.0,
+              sevoflurane: 280.0,
+              isoflurane: 120.0,
+            },
+          };
+
+          loadSettingsToForm();
+          updateSettingsPreview();
+
+          // Save to localStorage if not guest
+          if (!state.isGuest) {
+            saveUserData();
+          }
+
+          alert("Settings reset to default values.");
+        }
+      }
+
+      // Apply settings and recalculate
+      function applySettings() {
+        saveSettings();
+        calculateEmissions();
+        switchTab("calculator");
+      }
+
+      // Show current settings in an alert
+      function showCurrentSettings() {
+        const settingsText = `
+Current Emission Factors:
+- CO₂: ${state.settings.emissionFactors.co2}
+- N₂O: ${state.settings.emissionFactors.n2o}
+- Desflurane: ${state.settings.emissionFactors.desflurane}
+- Sevoflurane: ${state.settings.emissionFactors.sevoflurane}
+- Isoflurane: ${state.settings.emissionFactors.isoflurane}
+
+Current Gas Costs ($/kg):
+- CO₂: $${state.settings.gasCosts.co2.toFixed(2)}
+- N₂O: $${state.settings.gasCosts.n2o.toFixed(2)}
+- Desflurane: $${state.settings.gasCosts.desflurane.toFixed(2)}
+- Sevoflurane: $${state.settings.gasCosts.sevoflurane.toFixed(2)}
+- Isoflurane: $${state.settings.gasCosts.isoflurane.toFixed(2)}
+            `;
+
+        alert(settingsText);
+      }
+
+      // Calculate emissions
+      function calculateEmissions() {
+        // Get input values
+        const co2 = parseFloat(elements.co2Input.value) || 0;
+        const n2o = parseFloat(elements.n2oInput.value) || 0;
+        const desflurane = parseFloat(elements.desfluraneInput.value) || 0;
+        const sevoflurane = parseFloat(elements.sevofluraneInput.value) || 0;
+        const isoflurane = parseFloat(elements.isofluraneInput.value) || 0;
+
+        // Calculate CO₂ equivalents
+        const co2eCo2 = co2 * state.settings.emissionFactors.co2;
+        const co2eN2o = n2o * state.settings.emissionFactors.n2o;
+        const co2eDesflurane =
+          desflurane * state.settings.emissionFactors.desflurane;
+        const co2eSevoflurane =
+          sevoflurane * state.settings.emissionFactors.sevoflurane;
+        const co2eIsoflurane =
+          isoflurane * state.settings.emissionFactors.isoflurane;
+
+        const totalCo2e =
+          co2eCo2 + co2eN2o + co2eDesflurane + co2eSevoflurane + co2eIsoflurane;
+
+        // Calculate costs
+        const costCo2 = co2 * state.settings.gasCosts.co2;
+        const costN2o = n2o * state.settings.gasCosts.n2o;
+        const costDesflurane = desflurane * state.settings.gasCosts.desflurane;
+        const costSevoflurane =
+          sevoflurane * state.settings.gasCosts.sevoflurane;
+        const costIsoflurane = isoflurane * state.settings.gasCosts.isoflurane;
+
+        const totalCost =
+          costCo2 + costN2o + costDesflurane + costSevoflurane + costIsoflurane;
+        const carbonCost = (totalCo2e / 1000) * 50; // $50 per ton
+
+        // Calculate environmental impact
+        const carMiles = totalCo2e / 0.404; // Average car emits 0.404 kg CO₂ per mile
+        const homesPowered = totalCo2e / 28.5; // Average home emits 28.5 kg CO₂ per day
+        const treesNeeded = totalCo2e / 21.77; // Mature tree absorbs ~21.77 kg CO₂ per year
+
+        // Update results
+        elements.resultCo2.textContent = `${co2eCo2.toFixed(2)} kg`;
+        elements.resultN2o.textContent = `${co2eN2o.toFixed(2)} kg`;
+        elements.resultDesflurane.textContent = `${co2eDesflurane.toFixed(
+          2
+        )} kg`;
+        elements.resultSevoflurane.textContent = `${co2eSevoflurane.toFixed(
+          2
+        )} kg`;
+        elements.resultIsoflurane.textContent = `${co2eIsoflurane.toFixed(
+          2
+        )} kg`;
+        elements.resultTotal.textContent = `${totalCo2e.toFixed(2)} kg`;
+
+        // Update costs
+        elements.costCo2.textContent = `$${costCo2.toFixed(2)}`;
+        elements.costN2o.textContent = `$${costN2o.toFixed(2)}`;
+        elements.costDesflurane.textContent = `$${costDesflurane.toFixed(2)}`;
+        elements.costSevoflurane.textContent = `$${costSevoflurane.toFixed(2)}`;
+        elements.costIsoflurane.textContent = `$${costIsoflurane.toFixed(2)}`;
+        elements.costTotal.textContent = `$${totalCost.toFixed(2)}`;
+        elements.carbonCost.textContent = `$${carbonCost.toFixed(2)}`;
+
+        // Update environmental impact
+        elements.impactCars.textContent = `${carMiles.toFixed(0)} miles`;
+        elements.impactHomes.textContent = `${homesPowered.toFixed(1)} homes`;
+        elements.impactTrees.textContent = `${treesNeeded.toFixed(1)} trees`;
+
+        // Update chart
+        updateChart(
+          co2eCo2,
+          co2eN2o,
+          co2eDesflurane,
+          co2eSevoflurane,
+          co2eIsoflurane
+        );
+
+        // Store current calculation for potential saving
+        state.currentCalculation = {
+          inputs: { co2, n2o, desflurane, sevoflurane, isoflurane },
+          results: {
+            co2e: {
+              co2: co2eCo2,
+              n2o: co2eN2o,
+              desflurane: co2eDesflurane,
+              sevoflurane: co2eSevoflurane,
+              isoflurane: co2eIsoflurane,
+              total: totalCo2e,
+            },
+            costs: {
+              co2: costCo2,
+              n2o: costN2o,
+              desflurane: costDesflurane,
+              sevoflurane: costSevoflurane,
+              isoflurane: costIsoflurane,
+              total: totalCost,
+              carbon: carbonCost,
+            },
+            impact: {
+              cars: carMiles,
+              homes: homesPowered,
+              trees: treesNeeded,
+            },
+          },
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      // Reset calculator
+      function resetCalculator() {
+        elements.co2Input.value = "1.0";
+        elements.n2oInput.value = "1.0";
+        elements.desfluraneInput.value = "1.0";
+        elements.sevofluraneInput.value = "1.0";
+        elements.isofluraneInput.value = "1.0";
+
+        // Clear results
+        elements.resultCo2.textContent = "0 kg";
+        elements.resultN2o.textContent = "0 kg";
+        elements.resultDesflurane.textContent = "0 kg";
+        elements.resultSevoflurane.textContent = "0 kg";
+        elements.resultIsoflurane.textContent = "0 kg";
+        elements.resultTotal.textContent = "0 kg";
+
+        elements.costCo2.textContent = "$0";
+        elements.costN2o.textContent = "$0";
+        elements.costDesflurane.textContent = "$0";
+        elements.costSevoflurane.textContent = "$0";
+        elements.costIsoflurane.textContent = "$0";
+        elements.costTotal.textContent = "$0";
+        elements.carbonCost.textContent = "$0";
+
+        elements.impactCars.textContent = "0 miles";
+        elements.impactHomes.textContent = "0 homes";
+        elements.impactTrees.textContent = "0 trees";
+
+        // Reset chart
+        updateChart(0, 0, 0, 0, 0);
+
+        delete state.currentCalculation;
+      }
+
+      // Save current calculation
+      function saveCalculation() {
+        if (!state.currentCalculation) {
+          alert("Please calculate emissions first before saving.");
+          return;
+        }
+
+        // Add to history
+        state.calculationHistory.unshift({
+          ...state.currentCalculation,
+          id: Date.now().toString(),
+        });
+
+        // Update history display
+        updateHistoryDisplay();
+
+        // Update user stats
+        if (!state.isGuest) {
+          elements.calculationCount.textContent =
+            state.calculationHistory.length;
+          saveUserData();
+        }
+
+        alert("Calculation saved successfully!");
+      }
+
+      // Update history display
+      function updateHistoryDisplay() {
+        if (state.calculationHistory.length === 0) {
+          elements.historyList.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #aaa;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📊</div>
+                        <h3>No calculations saved yet</h3>
+                        <p>Your calculations will appear here when you save them</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Go to the Calculator tab to get started</p>
+                    </div>
+                `;
+          return;
+        }
+
+        let historyHTML = "";
+
+        state.calculationHistory.forEach((calc) => {
+          const date = new Date(calc.timestamp).toLocaleString();
+
+          historyHTML += `
+                    <div class="history-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4>Calculation from ${date}</h4>
+                            <button class="btn btn-danger btn-sm delete-history" data-id="${
+                              calc.id
+                            }">Delete</button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <div><strong>Inputs:</strong> CO₂: ${
+                              calc.inputs.co2
+                            }kg, N₂O: ${calc.inputs.n2o}kg, Desflurane: ${
+            calc.inputs.desflurane
+          }kg, Sevoflurane: ${calc.inputs.sevoflurane}kg, Isoflurane: ${
+            calc.inputs.isoflurane
+          }kg</div>
+                            <div><strong>Total CO₂e:</strong> ${calc.results.co2e.total.toFixed(
+                              2
+                            )} kg</div>
+                            <div><strong>Total Cost:</strong> $${calc.results.costs.total.toFixed(
+                              2
+                            )}</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn btn-primary btn-sm view-history" data-id="${
+                              calc.id
+                            }">View Details</button>
+                            <button class="btn btn-success btn-sm load-history" data-id="${
+                              calc.id
+                            }">Load in Calculator</button>
+                        </div>
+                    </div>
+                `;
+        });
+
+        elements.historyList.innerHTML = historyHTML;
+
+        // Add event listeners to history buttons
+        document.querySelectorAll(".view-history").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = this.dataset.id;
+            viewHistoryItem(id);
+          });
+        });
+
+        document.querySelectorAll(".load-history").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = this.dataset.id;
+            loadHistoryItem(id);
+          });
+        });
+
+        document.querySelectorAll(".delete-history").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = this.dataset.id;
+            deleteHistoryItem(id);
+          });
+        });
+      }
+
+      // View history item details
+      function viewHistoryItem(id) {
+        const item = state.calculationHistory.find((calc) => calc.id === id);
+        if (!item) return;
+
+        const details = `
+Calculation from ${new Date(item.timestamp).toLocaleString()}
+
+Inputs:
+- CO₂: ${item.inputs.co2} kg
+- N₂O: ${item.inputs.n2o} kg
+- Desflurane: ${item.inputs.desflurane} kg
+- Sevoflurane: ${item.inputs.sevoflurane} kg
+- Isoflurane: ${item.inputs.isoflurane} kg
+
+CO₂ Equivalent Emissions:
+- CO₂: ${item.results.co2e.co2.toFixed(2)} kg
+- N₂O: ${item.results.co2e.n2o.toFixed(2)} kg
+- Desflurane: ${item.results.co2e.desflurane.toFixed(2)} kg
+- Sevoflurane: ${item.results.co2e.sevoflurane.toFixed(2)} kg
+- Isoflurane: ${item.results.co2e.isoflurane.toFixed(2)} kg
+- TOTAL: ${item.results.co2e.total.toFixed(2)} kg
+
+Costs:
+- CO₂: $${item.results.costs.co2.toFixed(2)}
+- N₂O: $${item.results.costs.n2o.toFixed(2)}
+- Desflurane: $${item.results.costs.desflurane.toFixed(2)}
+- Sevoflurane: $${item.results.costs.sevoflurane.toFixed(2)}
+- Isoflurane: $${item.results.costs.isoflurane.toFixed(2)}
+- TOTAL: $${item.results.costs.total.toFixed(2)}
+- Carbon Cost: $${item.results.costs.carbon.toFixed(2)}
+
+Environmental Impact:
+- Equivalent Car Miles: ${item.results.impact.cars.toFixed(0)} miles
+- Homes Powered (1 day): ${item.results.impact.homes.toFixed(1)} homes
+- Trees Needed (10 yrs): ${item.results.impact.trees.toFixed(1)} trees
+            `;
+
+        alert(details);
+      }
+
+      // Load history item into calculator
+      function loadHistoryItem(id) {
+        const item = state.calculationHistory.find((calc) => calc.id === id);
+        if (!item) return;
+
+        // Set input values
+        elements.co2Input.value = item.inputs.co2;
+        elements.n2oInput.value = item.inputs.n2o;
+        elements.desfluraneInput.value = item.inputs.desflurane;
+        elements.sevofluraneInput.value = item.inputs.sevoflurane;
+        elements.isofluraneInput.value = item.inputs.isoflurane;
+
+        // Switch to calculator tab
+        switchTab("calculator");
+
+        // Calculate to update results
+        calculateEmissions();
+
+        alert("Calculation loaded successfully!");
+      }
+
+      // Delete history item
+      function deleteHistoryItem(id) {
+        if (confirm("Are you sure you want to delete this calculation?")) {
+          state.calculationHistory = state.calculationHistory.filter(
+            (calc) => calc.id !== id
+          );
+          updateHistoryDisplay();
+
+          if (!state.isGuest) {
+            elements.calculationCount.textContent =
+              state.calculationHistory.length;
+            saveUserData();
+          }
+        }
+      }
+
+      // Clear all history
+      function clearHistory() {
+        if (state.calculationHistory.length === 0) {
+          alert("No calculations to clear.");
+          return;
+        }
+
+        if (
+          confirm(
+            "Are you sure you want to clear all calculation history? This cannot be undone."
+          )
+        ) {
+          state.calculationHistory = [];
+          updateHistoryDisplay();
+
+          if (!state.isGuest) {
+            elements.calculationCount.textContent = 0;
+            saveUserData();
+          }
+        }
+      }
+
+      // Export history data
+      function exportHistory() {
+        if (state.calculationHistory.length === 0) {
+          alert("No calculations to export.");
+          return;
+        }
+
+        const data = {
+          user: state.currentUser,
+          exportDate: new Date().toISOString(),
+          calculations: state.calculationHistory,
+        };
+
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `anesthetic_emissions_${state.currentUser}_${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Initialize chart
+      function initChart() {
+        const ctx = document.getElementById("emissions-chart").getContext("2d");
+        elements.emissionsChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["CO₂", "N₂O", "Desflurane", "Sevoflurane", "Isoflurane"],
+            datasets: [
+              {
+                label: "CO₂ Equivalent Emissions (kg)",
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: [
+                  "rgba(54, 162, 235, 0.7)",
+                  "rgba(255, 99, 132, 0.7)",
+                  "rgba(255, 159, 64, 0.7)",
+                  "rgba(75, 192, 192, 0.7)",
+                  "rgba(153, 102, 255, 0.7)",
+                ],
+                borderColor: [
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(255, 159, 64, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "CO₂ Equivalent (kg)",
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return `${context.dataset.label}: ${context.raw.toFixed(
+                      2
+                    )} kg`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Update chart with new data
+      function updateChart(co2, n2o, desflurane, sevoflurane, isoflurane) {
+        if (elements.emissionsChart) {
+          elements.emissionsChart.data.datasets[0].data = [
+            co2,
+            n2o,
+            desflurane,
+            sevoflurane,
+            isoflurane,
+          ];
+          elements.emissionsChart.update();
+        }
+      }
+
+      // Initialize the application when the page loads
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
